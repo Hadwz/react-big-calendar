@@ -1,14 +1,14 @@
 {
   "name": "react-big-calendar",
-  "version": "0.23.0",
-  "description": "Calendar! with events",
+  "version": "0.33.3",
+  "description": "fork from react-big-calendar, Calendar! with events",
   "author": {
-    "name": "Jason Quense",
-    "email": "monastic.panic@gmail.com"
+    "name": "Robin",
+    "email": "1063141313@qq.com"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/jquense/react-big-calendar.git"
+    "url": "git+https://github.com/Hadwz/react-big-calendar.git"
   },
   "license": "MIT",
   "main": "lib/index.js",
@@ -144,9 +144,9 @@
     "babel-core": "7.0.0-bridge.0"
   },
   "bugs": {
-    "url": "https://github.com/jquense/react-big-calendar/issues"
+    "url": "https://github.com/Hadwz/react-big-calendar/issues"
   },
   "readme": "ERROR: No README data found!",
-  "homepage": "https://github.com/jquense/react-big-calendar#readme",
-  "_id": "react-big-calendar@0.22.1"
+  "homepage": "https://github.com/Hadwz/react-big-calendar",
+  "_id": "react-big-calendar@0.33.3"
 }
