@@ -27,7 +27,13 @@
     &:hover {
       .rbc-addons-dnd-resize-ns-icon, .rbc-addons-dnd-resize-ew-icon { display: block; }
     }
-  }
+	}
+	
+	.rbc-event.rbc-addons-dnd-drag-preview {
+		.rbc-addons-dnd-resize-ns-icon, .rbc-addons-dnd-resize-ew-icon { 
+			display: block;
+		}
+	}
 
   .rbc-addons-dnd-dragged-event {
     opacity: 0;

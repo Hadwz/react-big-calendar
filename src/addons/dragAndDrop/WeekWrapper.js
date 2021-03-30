@@ -145,6 +145,9 @@ class WeekWrapper extends React.Component {
       if (dates.gt(start, end)) {
         start = originalStart
       }
+    } else if (!cursorInRow) {
+      //如果不是左右方向，且指针没有在Row里面则不做更新
+      return
     }
 
     this.update(event, start, end)

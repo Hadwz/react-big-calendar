@@ -114,6 +114,7 @@ class DayColumn extends React.Component {
       resource,
       accessors,
       localizer,
+      resizable,
       getters: { dayProp, ...getters },
       components: { eventContainerWrapper: EventContainer, ...components },
     } = this.props
@@ -153,6 +154,7 @@ class DayColumn extends React.Component {
           getters={getters}
           components={components}
           slotMetrics={slotMetrics}
+          resizable={resizable}
         >
           <div className={clsx('rbc-events-container', rtl && 'rtl')}>
             {this.renderEvents({

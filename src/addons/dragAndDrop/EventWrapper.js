@@ -1,9 +1,13 @@
 import PropTypes from 'prop-types'
 import React from 'react'
 import clsx from 'clsx'
+import { isEqualWith, isEqual } from 'lodash'
 import { accessor as get } from '../../utils/accessors'
 import { DnDContext } from './DnDContext'
 
+/**
+ * EventWrapper的作用：组合包裹Event，Anchor，监听move，resize等操作，并派发给其他组件
+ */
 class EventWrapper extends React.Component {
   static contextType = DnDContext
 
@@ -19,26 +23,29 @@ class EventWrapper extends React.Component {
     isDragging: PropTypes.bool,
     isResizing: PropTypes.bool,
     resizable: PropTypes.bool,
+    isPreview: PropTypes.bool,
   }
 
   handleResizeUp = e => {
-    if (e.button !== 0) return
+    //修改点：e.button等于0代表的是鼠标左键点击
+    //当e为TouchEvent时，e.button就不等于0，这里加上type的判断来兼容
+    if (e.type === 'mousedown' && e.button !== 0) return
     this.context.draggable.onBeginAction(this.props.event, 'resize', 'UP')
   }
   handleResizeDown = e => {
-    if (e.button !== 0) return
+    if (e.type === 'mousedown' && e.button !== 0) return
     this.context.draggable.onBeginAction(this.props.event, 'resize', 'DOWN')
   }
   handleResizeLeft = e => {
-    if (e.button !== 0) return
+    if (e.type === 'mousedown' && e.button !== 0) return
     this.context.draggable.onBeginAction(this.props.event, 'resize', 'LEFT')
   }
   handleResizeRight = e => {
-    if (e.button !== 0) return
+    if (e.type === 'mousedown' && e.button !== 0) return
     this.context.draggable.onBeginAction(this.props.event, 'resize', 'RIGHT')
   }
   handleStartDragging = e => {
-    if (e.button !== 0) return
+    if (e.type === 'mousedown' && e.button !== 0) return
     // hack: because of the way the anchors are arranged in the DOM, resize
     // anchor events will bubble up to the move anchor listener. Don't start
     // move operations when we're on a resize anchor.
@@ -47,16 +54,64 @@ class EventWrapper extends React.Component {
       this.context.draggable.onBeginAction(this.props.event, 'move')
   }
 
+  isEqualEvent(ev1, ev2) {
+    return (
+      ev1.id === ev2.id ||
+      ev1.title === ev2.title ||
+      (isEqual(ev1.start, ev2.start) && isEqual(ev1.end, ev2.end))
+    )
+  }
+
   renderAnchor(direction) {
     const cls = direction === 'Up' || direction === 'Down' ? 'ns' : 'ew'
     return (
       <div
         className={`rbc-addons-dnd-resize-${cls}-anchor`}
         onMouseDown={this[`handleResize${direction}`]}
+        //修改点：监听触摸开始事件
+        onTouchMove={this[`handleResize${direction}`]}
       >
         <div className={`rbc-addons-dnd-resize-${cls}-icon`} />
       </div>
     )
+  }
+
+  /**
+   * 渲染预览的Event
+   * 修改点：如果事件支持调整大小，则在事件的基础上，增加resizeAnchor的内容
+   * @param {boolean} isResizable 是否可以调整大小
+   */
+  renderPreviewEvent(isResizable) {
+    const { type, children, continuesPrior, continuesAfter } = this.props
+
+    if (isResizable) {
+      let StartAnchor = null
+      let EndAnchor = null
+
+      // replace original event child with anchor-embellished child
+      if (type === 'date') {
+        StartAnchor = !continuesPrior && this.renderAnchor('Left')
+        EndAnchor = !continuesAfter && this.renderAnchor('Right')
+      } else {
+        StartAnchor = !continuesPrior && this.renderAnchor('Up')
+        EndAnchor = !continuesAfter && this.renderAnchor('Down')
+      }
+
+      return React.cloneElement(children, {
+        children: (
+          <div className="rbc-addons-dnd-resizable">
+            {StartAnchor}
+            {children.props.children}
+            {EndAnchor}
+          </div>
+        ),
+        className: clsx(children.props.className),
+      })
+    }
+
+    return React.cloneElement(children, {
+      className: clsx(children.props.className),
+    })
   }
 
   render() {
@@ -66,17 +121,10 @@ class EventWrapper extends React.Component {
       continuesPrior,
       continuesAfter,
       resizable,
+      isPreview,
     } = this.props
 
     let { children } = this.props
-
-    if (event.__isPreview)
-      return React.cloneElement(children, {
-        className: clsx(
-          children.props.className,
-          'rbc-addons-dnd-drag-preview'
-        ),
-      })
 
     const { draggable } = this.context
     const { draggableAccessor, resizableAccessor } = draggable
@@ -113,6 +161,10 @@ class EventWrapper extends React.Component {
       resizable && (resizableAccessor ? !!get(event, resizableAccessor) : true)
 
     if (isResizable || isDraggable) {
+      if (isPreview) {
+        return this.renderPreviewEvent(isResizable)
+      }
+
       /*
        * props.children is the singular <Event> component.
        * BigCalendar positions the Event abolutely and we
@@ -150,12 +202,15 @@ class EventWrapper extends React.Component {
 
       if (
         draggable.dragAndDropAction.interacting && // if an event is being dragged right now
-        draggable.dragAndDropAction.event === event // and it's the current event
+        //修改点：这里只做值相等判断，不做引用判断
+        //修改目的：修复resize的时候event没有正确加上class，导致event出现半透明而没有隐藏显示的问题
+        isEqualWith(draggable.dragAndDropAction.event, event, this.isEqualEvent)
       ) {
         // add a new class to it
         newProps.className = clsx(
           children.props.className,
-          'rbc-addons-dnd-dragged-event'
+          'rbc-addons-dnd-dragged-event',
+          'rbc-addons-dnd-dragged-active'
         )
       }
 

@@ -184,9 +184,10 @@ class Selection {
     })
     const removeTouchStartListener = addEventListener('touchstart', e => {
       this._removeInitialEventListener()
-      this._removeInitialEventListener = this._addLongPressListener(
-        this._handleInitialEvent,
-        e
+      this._handleInitialEvent(e)
+      this._removeInitialEventListener = addEventListener(
+        'touchstart',
+        this._handleInitialEvent
       )
     })
 

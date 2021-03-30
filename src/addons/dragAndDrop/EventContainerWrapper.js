@@ -9,8 +9,10 @@ import Selection, {
 } from '../../Selection'
 import TimeGridEvent from '../../TimeGridEvent'
 import { dragAccessors, eventTimes, pointInColumn } from './common'
-import NoopWrapper from '../../NoopWrapper'
 
+/**
+ * EventContainerWrapper的作用：包裹Event，PreviewEvent，处理move、resize等事件;
+ */
 class EventContainerWrapper extends React.Component {
   static propTypes = {
     accessors: PropTypes.object.isRequired,
@@ -19,6 +21,7 @@ class EventContainerWrapper extends React.Component {
     localizer: PropTypes.object.isRequired,
     slotMetrics: PropTypes.object.isRequired,
     resource: PropTypes.any,
+    resizable: PropTypes.bool,
   }
 
   static contextType = DnDContext
@@ -204,6 +207,7 @@ class EventContainerWrapper extends React.Component {
       getters,
       slotMetrics,
       localizer,
+      resizable,
     } = this.props
 
     let { event, top, height } = this.state
@@ -233,10 +237,15 @@ class EventContainerWrapper extends React.Component {
             <TimeGridEvent
               event={event}
               label={label}
+              //修改点：为Preview Event新增标志位
+              isPreview={true}
+              //为previewEvent提供标志
+              resizable={resizable}
               className="rbc-addons-dnd-drag-preview"
               style={{ top, height, width: 100 }}
               getters={getters}
-              components={{ ...components, eventWrapper: NoopWrapper }}
+              //修改点：components支持传入EventWrapper
+              components={components}
               accessors={{ ...accessors, ...dragAccessors }}
               continuesEarlier={startsBeforeDay}
               continuesLater={startsAfterDay}
