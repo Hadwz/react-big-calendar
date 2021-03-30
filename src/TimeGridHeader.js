@@ -120,6 +120,7 @@ class TimeGridHeader extends React.Component {
       scrollRef,
       localizer,
       isOverflowing,
+      showAllDay,
       components: {
         timeGutterHeader: TimeGutterHeader,
         resourceHeader: ResourceHeaderComponent = ResourceHeader,
@@ -167,28 +168,30 @@ class TimeGridHeader extends React.Component {
             >
               {this.renderHeaderCells(range)}
             </div>
-            <DateContentRow
-              isAllDay
-              rtl={rtl}
-              getNow={getNow}
-              minRows={2}
-              range={range}
-              events={groupedEvents.get(id) || []}
-              resourceId={resource && id}
-              className="rbc-allday-cell"
-              selectable={selectable}
-              selected={this.props.selected}
-              components={components}
-              accessors={accessors}
-              getters={getters}
-              localizer={localizer}
-              onSelect={this.props.onSelectEvent}
-              onDoubleClick={this.props.onDoubleClickEvent}
-              onKeyPress={this.props.onKeyPressEvent}
-              onSelectSlot={this.props.onSelectSlot}
-              longPressThreshold={this.props.longPressThreshold}
-              resizable={resizable}
-            />
+            {showAllDay && (
+              <DateContentRow
+                isAllDay
+                rtl={rtl}
+                getNow={getNow}
+                minRows={2}
+                range={range}
+                events={groupedEvents.get(id) || []}
+                resourceId={resource && id}
+                className="rbc-allday-cell"
+                selectable={selectable}
+                selected={this.props.selected}
+                components={components}
+                accessors={accessors}
+                getters={getters}
+                localizer={localizer}
+                onSelect={this.props.onSelectEvent}
+                onDoubleClick={this.props.onDoubleClickEvent}
+                onKeyPress={this.props.onKeyPressEvent}
+                onSelectSlot={this.props.onSelectSlot}
+                longPressThreshold={this.props.longPressThreshold}
+                resizable={resizable}
+              />
+            )}
           </div>
         ))}
       </div>
@@ -223,6 +226,7 @@ TimeGridHeader.propTypes = {
   onDrillDown: PropTypes.func,
   getDrilldownView: PropTypes.func.isRequired,
   scrollRef: PropTypes.any,
+  showAllDay: PropTypes.bool,
 }
 
 export default TimeGridHeader

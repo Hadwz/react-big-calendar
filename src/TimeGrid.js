@@ -180,6 +180,7 @@ export default class TimeGrid extends Component {
       showMultiDayTimes,
       longPressThreshold,
       resizable,
+      showAllDay,
     } = this.props
 
     width = width || this.state.gutterWidth
@@ -248,6 +249,7 @@ export default class TimeGrid extends Component {
           onDrillDown={this.props.onDrillDown}
           getDrilldownView={this.props.getDrilldownView}
           resizable={resizable}
+          showAllDay={showAllDay}
         />
         <div
           ref={this.contentRef}
@@ -374,6 +376,7 @@ TimeGrid.propTypes = {
   getDrilldownView: PropTypes.func.isRequired,
 
   dayLayoutAlgorithm: DayLayoutAlgorithmPropType,
+  showAllDay: PropTypes.bool,
 }
 
 TimeGrid.defaultProps = {
@@ -382,4 +385,5 @@ TimeGrid.defaultProps = {
   min: dates.startOf(new Date(), 'day'),
   max: dates.endOf(new Date(), 'day'),
   scrollToTime: dates.startOf(new Date(), 'day'),
+  showAllDay: false,
 }
