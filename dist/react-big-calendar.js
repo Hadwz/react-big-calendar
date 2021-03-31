@@ -13515,7 +13515,10 @@
           EventContainer = _this$props3$componen.eventContainerWrapper,
           components = _objectWithoutPropertiesLoose(_this$props3$componen, [
             'eventContainerWrapper',
-          ])
+          ]),
+          onMoving = _this$props3.onMoving,
+          onResizing = _this$props3.onResizing,
+          handleNotPointInColumn = _this$props3.handleNotPointInColumn
 
         var slotMetrics = this.slotMetrics
         var _this$state = this.state,
@@ -13565,6 +13568,9 @@
               components: components,
               slotMetrics: slotMetrics,
               resizable: resizable,
+              onMoving: onMoving,
+              onResizing: onResizing,
+              handleNotPointInColumn: handleNotPointInColumn,
             },
             React__default.createElement(
               'div',
@@ -13641,6 +13647,9 @@
     dragThroughEvents: propTypes.bool,
     resource: propTypes.any,
     dayLayoutAlgorithm: DayLayoutAlgorithmPropType,
+    onMoving: propTypes.func,
+    onResizing: propTypes.func,
+    handleNotPointInColumn: propTypes.func,
   }
   DayColumn.defaultProps = {
     dragThroughEvents: true,
