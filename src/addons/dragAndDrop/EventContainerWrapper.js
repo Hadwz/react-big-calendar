@@ -1,5 +1,6 @@
 import PropTypes from 'prop-types'
 import React from 'react'
+import { isFunction } from 'lodash'
 import * as dates from '../../utils/dates'
 import { DnDContext } from './DnDContext'
 
@@ -22,6 +23,9 @@ class EventContainerWrapper extends React.Component {
     slotMetrics: PropTypes.object.isRequired,
     resource: PropTypes.any,
     resizable: PropTypes.bool,
+    onMoving: PropTypes.func,
+    onResizing: PropTypes.func,
+    handleNotPointInColumn: PropTypes.func,
   }
 
   static contextType = DnDContext
@@ -63,9 +67,20 @@ class EventContainerWrapper extends React.Component {
   }
 
   handleMove = (point, bounds) => {
-    if (!pointInColumn(bounds, point)) return this.reset()
+    if (!pointInColumn(bounds, point)) {
+      if (isFunction(this.props.handleNotPointInColumn)) {
+        //处理鼠标/手势当前的点不在列中的情况
+
+        return this.props.handleNotPointInColumn(
+          this.context.draggable.dragAndDropAction
+        )
+      }
+
+      return this.reset()
+    }
+
     const { event } = this.context.draggable.dragAndDropAction
-    const { accessors, slotMetrics } = this.props
+    const { accessors, slotMetrics, onMoving } = this.props
 
     const newSlot = slotMetrics.closestSlotFromPoint(
       { y: point.y - this.eventOffsetTop, x: point.x },
@@ -74,11 +89,18 @@ class EventContainerWrapper extends React.Component {
 
     const { duration } = eventTimes(event, accessors)
     let newEnd = dates.add(newSlot, duration, 'milliseconds')
+
+    if (isFunction(onMoving)) {
+      if (onMoving(newSlot, newEnd, event) === false) {
+        return
+      }
+    }
+
     this.update(event, slotMetrics.getRange(newSlot, newEnd, false, true))
   }
 
   handleResize(point, bounds) {
-    const { accessors, slotMetrics } = this.props
+    const { accessors, slotMetrics, onResizing } = this.props
     const { event, direction } = this.context.draggable.dragAndDropAction
     const newTime = slotMetrics.closestSlotFromPoint(point, bounds)
 
@@ -87,6 +109,12 @@ class EventContainerWrapper extends React.Component {
       start = dates.min(newTime, slotMetrics.closestSlotFromDate(end, -1))
     } else if (direction === 'DOWN') {
       end = dates.max(newTime, slotMetrics.closestSlotFromDate(start))
+    }
+
+    if (isFunction(onResizing)) {
+      if (onResizing(start, end, event) === false) {
+        return
+      }
     }
 
     this.update(event, slotMetrics.getRange(start, end))
@@ -208,6 +236,7 @@ class EventContainerWrapper extends React.Component {
       slotMetrics,
       localizer,
       resizable,
+      resource,
     } = this.props
 
     let { event, top, height } = this.state
@@ -221,6 +250,7 @@ class EventContainerWrapper extends React.Component {
 
     const startsBeforeDay = slotMetrics.startsBeforeDay(start)
     const startsAfterDay = slotMetrics.startsAfterDay(end)
+    const isSomeResource = event.resourceId === resource //只有在同一个时间轴内的才会渲染Preview
 
     if (startsBeforeDay) format = 'eventTimeRangeEndFormat'
     else if (startsAfterDay) format = 'eventTimeRangeStartFormat'
@@ -233,7 +263,7 @@ class EventContainerWrapper extends React.Component {
         <React.Fragment>
           {events}
 
-          {event && (
+          {event && isSomeResource && (
             <TimeGridEvent
               event={event}
               label={label}

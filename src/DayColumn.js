@@ -117,6 +117,9 @@ class DayColumn extends React.Component {
       resizable,
       getters: { dayProp, ...getters },
       components: { eventContainerWrapper: EventContainer, ...components },
+      onMoving,
+      onResizing,
+      handleNotPointInColumn,
     } = this.props
 
     let { slotMetrics } = this
@@ -155,6 +158,9 @@ class DayColumn extends React.Component {
           components={components}
           slotMetrics={slotMetrics}
           resizable={resizable}
+          onMoving={onMoving}
+          onResizing={onResizing}
+          handleNotPointInColumn={handleNotPointInColumn}
         >
           <div className={clsx('rbc-events-container', rtl && 'rtl')}>
             {this.renderEvents({
@@ -424,6 +430,9 @@ DayColumn.propTypes = {
   resource: PropTypes.any,
 
   dayLayoutAlgorithm: DayLayoutAlgorithmPropType,
+  onMoving: PropTypes.func,
+  onResizing: PropTypes.func,
+  handleNotPointInColumn: PropTypes.func,
 }
 
 DayColumn.defaultProps = {
